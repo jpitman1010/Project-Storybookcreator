@@ -37,34 +37,29 @@ class User(db.Model):
 
 
 
-# class Book(db.Model):
-#     """A Book."""
+class Book(db.Model):
+    """A Book."""
     
-#     __tablename__ = "books"
+    __tablename__ = "books"
 
-#     book_id = db.Column(db.Integer, 
-#                         autoincrement=True,
-#                         primary_key=True,)
-#     title = db.Column(db.String,)
-#     # summary = db.Column(db.text,)
-#     genre = db.Column(db.String,)
-#     cover_img = db.Column (db.String)
-#     author_id = db.Column(db.Integer, 
-#                         db.ForeignKey("users.user_id"),
-#                         primary_key=True)
-#     author_fname = db.Column(db.String, 
-#                         db.ForeignKey("users.fname"),)
-#     author_lname = db.Column(db.String, 
-#                         db.ForeignKey("users.fname"),)
-#     created_date = db.Column(db.DateTime,)
-
-#     # user = db.relationship('users', foreign_keys='Book.author_id')
+    book_id = db.Column(db.Integer, 
+                        autoincrement=True,
+                        primary_key=True,)
+    title = db.Column(db.String,)
+    # summary = db.Column(db.text,)
+    genre = db.Column(db.String,)
+    # cover_img = db.Column (db.String)
+    author_id = db.Column(db.Integer, 
+                        primary_key=True)
+ 
+    created_date = db.Column(db.DateTime,)
 
 
-#     def __repr__(self):
-#         """show info about the book"""
 
-#         return f"<Book ID={self.book_id} title={self.title}, author ={self.author_id}{self.author_fname}{self.author_lname}, creation date = {self.creation_date}.>"
+    def __repr__(self):
+        """show info about the book"""
+
+        return f"<Book ID={self.book_id} title={self.title}, author ={self.author_id}{self.author_fname}{self.author_lname}, creation date = {self.creation_date}.>"
 
 # class Pages(db.Model):
 #     """A Book."""

@@ -1,6 +1,6 @@
 """Server operations. CRUD = create,read,update,delete"""
 
-from model import User, db
+from model import User,Book, db
 from flask import flash, redirect
 
 def create_user(email, password,fname,lname, user_id):
@@ -39,13 +39,14 @@ def check_login(email, password):
         flash("Sorry, that is not a valid user login.")
         return redirect('/')
 
-def create_book(author, title, book_id):
-    """Create a rating"""
+def create_book(author_id,title, book_id):
+    """Create a books"""
 
-    book = Book(author=author, title=title, book_id= book_id)
+    book = Book(author_id = author_id,title=title, book_id= book_id)
 
     db.session.add(book)
     db.session.commit()
+
 
     return book
 
