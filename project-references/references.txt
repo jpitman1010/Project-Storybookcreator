@@ -1,0 +1,1 @@
+https://developer.mozilla.org/en-US/docs/Web/Guide/AJAX/Getting_Started  -using for button event triggering new html page for registration button
