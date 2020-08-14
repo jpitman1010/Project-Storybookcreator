@@ -1,24 +1,17 @@
 <!DOCTYPE html>
 <html>
-{% block head %}
 
 <head>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <div id='root'></div>
 
-    <link rel="stylesheet" href="/static/style.css">
 
-    <title>
-        {% block title %}{% endblock %}
-    </title>
-
-
+    <script src="/static/storybook.jsx" type="text/jsx"></script>
 </head>
-{% endblock %} {% block body %}
 
-<body>
-    <p>
-    </p>
-    <script src='/static/storybook.js'></script>
-</body>
-{% endblock %} {% block after_body %} {% endblock %}
 
 </html>

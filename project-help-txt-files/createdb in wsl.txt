@@ -23,3 +23,7 @@ to get table attributes, then SELECT * from  (tablename) to see everything on ta
 
 drop database:
 sudo -u postgres dropdb (dbname)
+
+
+giving superuser permissions inside of database
+ALTER USER jpitman1010 WITH SUPERUSER;
