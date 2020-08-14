@@ -1,6 +1,7 @@
 """Tables for Storybook Creator App and connection to database"""
-
+import datetime
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, DateTime
 
 
 db = SQLAlchemy()
@@ -25,8 +26,8 @@ class User(db.Model):
                         autoincrement=True,
                         primary_key= True,)
     email = db.Column(db.String, unique = True,)
-    fname = db.Column(db.String)
-    lname = db.Column(db.String)
+    fname = db.Column(db.String,)
+    lname = db.Column(db.String,)
     password = db.Column(db.String, nullable=False)
 
 
@@ -42,43 +43,48 @@ class Book(db.Model):
     
     __tablename__ = "books"
 
-    book_id = db.Column(db.Integer, 
+    id = db.Column(db.Integer, 
                         autoincrement=True,
                         primary_key=True,)
     title = db.Column(db.String,)
     # summary = db.Column(db.text,)
-    genre = db.Column(db.String,)
-    # cover_img = db.Column (db.String)
-    author_id = db.Column(db.Integer, 
-                        primary_key=True)
- 
-    created_date = db.Column(db.DateTime,)
+    # genre = db.Column(db.Stringing,)
+    # cover_img = db.Column (db.Stringing)
+    author_id = db.Column(db.Integer,
+                      db.ForeignKey("users.user_id"),)
+    created_date = db.Column(db.DateTime,default=datetime.datetime.utcnow,)
+    #change to datetime once seeding is working.
 
+
+    author = db.relationship('User', backref = 'Book',)
 
 
     def __repr__(self):
         """show info about the book"""
 
-        return f"<Book ID={self.book_id} title={self.title}, author ={self.author_id}{self.author_fname}{self.author_lname}, creation date = {self.creation_date}.>"
+        return f"<User's book = {self.author_id}, Book ID={self.book_id} title={self.title}.>"
 
-# class Pages(db.Model):
-#     """A Book."""
-#     __tablename__ = "pages"
+class Page(db.Model):
+    """A Book."""
+    __tablename__ = "pages"
 
-#     page_number = db.Column(db.Integer, 
-#                         autoincrement=True,
-#                         primary_key=True,)
-#     page_text = db.Column(db.text,)
-#     page_image = Column(db.String)
+  
+    id= db.Column(db.Integer, 
+                autoincrement=True,
+                primary_key=True,)
+    # page_number =db.Column(db.Integer,)
+    book_id= db.Column(db.Integer,
+                        db.ForeignKey('books.id'),)
+    text = db.Column(db.Integer,)
+    image = db.Column(db.String,)
 
 
-#     book = db.relationship('Books', backref='pages',)
-#     user = db.relationship('Users', backref = 'pages',)
+    book = db.relationship('Book', backref='pages')
 
-#     def __repr__(self):
-#         """show info about the pages"""
+    def __repr__(self):
+        """show info about the pages"""
 
-#         return f"< Page Number = {self.page_number} page text={self.page_text}, page image = {self.page_image}.>"
+        return f"< Page Number = {self.id} page text={self.text}, page image = {self.image}.>"
 
     
 
@@ -86,10 +92,9 @@ if __name__ == '__main__':
     from storybookcreator import app
     connect_to_db(app)
     # session = session_factory()
-    app.db.create_all()
+    # app.db.create_all()
     
     # Call connect_to_db(app, echo=False)
     #  if your program output gets
     # too annoying; this will tell SQLAlchemy not to print out every
     # query it executes.
-

@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="/static/style.css">
 
     <title>
-        Storybook Creator Logins
+        Login
     </title>
     {% block body %}
     <h1>Welcome to the Storybook Creator!!!</h1>
@@ -33,37 +33,9 @@
     </script>
 
     <div>
-        <h2>New User? No problem!! Click here to create an account.</h2>
-        <button id="create-account">
-            Create Account
-        </button>
-    </div>
+        <h2>New to Storybook Creator? No problem!! Click <a href="/user_regiStringation">New User </a> to create an account.</h2>
 
-    <div>
-        <h2>Hello new user, please fill out the information below so that we can create your account.</h2>
-        <button id="create-account">
-            Create Account
-        </button>
+
     </div>
-    <form action="/user_registration" method="POST">
-        <p>
-            Email (if you do not have an email account, with your parents permission, enter their email here) <input type="text" name="email">
-        </p>
-        <p>
-            Password <input type="password" name="password">
-        </p>
-        <p>
-            First Name <input type="text" name="fname" id="fname">
-        </p>
-        <p>
-            Last Name <input type="text" name="lname" id="lname">
-        </p>
-        <p>
-            If you prefer to go by a nickname, enter that name here. <input type="text" name="nickname" id="nickname">
-        </p>
-        <p>
-            <input type="submit">
-        </p>
-    </form>
 
     {% endblock %}

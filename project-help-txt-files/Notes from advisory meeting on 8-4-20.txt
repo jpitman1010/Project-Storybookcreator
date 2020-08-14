@@ -10,7 +10,7 @@ cloudinary
 
 book is a collection of pages, and will have a collection of collectoins, and will have assets, 
 
-will have to restrict to 1 image and 1 block of text per page.
+will have to reStringict to 1 image and 1 block of text per page.
 
 
 start with 1 image, 1 block of text on each page, so many pages per book.  

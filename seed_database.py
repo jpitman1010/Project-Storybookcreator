@@ -6,7 +6,7 @@ import os
 import json
 from random import choice, randint
 from datetime import datetime
-from model import connect_to_db
+from model import connect_to_db, db, User, Book, Page
 import model
 import crud
 import storybookcreator
@@ -32,11 +32,10 @@ for n in range(1,150):
     user_id = n
     author_id = n
     title = f'Title{n}'
-    book_id = n
 
-    user = crud.create_user(email=email, password=password, fname = fname,lname=lname, user_id = user_id)
+    user = crud.create_user(email=email, password=password, fname = fname,lname=lname)
     print(user)
-    book = crud.create_book(author_id=author_id, title=title, book_id=book_id)
+    book = crud.create_book(author_id=author_id, title=title)
 
     books_in_db.append(book)
     users_in_db.append(user)
