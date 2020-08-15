@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html>
-{% block head %}
+{% extends 'index.html' %} {% block head %} {% endblock %} {% block content %}
 
-<head>
+<h1>
+    Welcome to your library {{session['fname']}} !!!
+</h1>
 
-    {% block title %}My Library{% endblock %}
-    <h1> Welcome to your library {{fname}}. Your User ID is {{user_id}}.</h1>
-</head>
-{% endblock %} {% block body %}
-
-<body>
-
-
-</body>
-{% endblock %}
-
-</html>
+<button><a href = "/pages" >Create New Storybook </a></button> {% endblock %}

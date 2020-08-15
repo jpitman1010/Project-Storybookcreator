@@ -49,7 +49,7 @@ class Book(db.Model):
     # genre = db.Column(db.String,)
     # cover_img = db.Column (db.String)
     author_id = db.Column(db.Integer,
-                        db.ForeignKey("users.user_id"),)
+                        db.ForeignKey("users.id"),)
     created_date = db.Column(db.DateTime,default=datetime.datetime.utcnow,)
     #change to datetime once seeding is working.
 
@@ -72,7 +72,7 @@ class Page(db.Model):
                         primary_key=True,)
     # page_number =db.Column(db.Integer,)
     book_id= db.Column(db.Integer,
-                        db.ForeignKey('books.book_id'),)
+                        db.ForeignKey('books.id'),)
     text = db.Column(db.String)
     image = db.Column(db.String)
 

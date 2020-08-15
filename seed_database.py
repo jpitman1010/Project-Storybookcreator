@@ -32,12 +32,13 @@ for n in range(1,10):
     email = f'{fname}.{lname}@test.com'  # unique emails
     password = fake.word()
     title = " ".join(fake.words())
+    author_id = f"{fname} {lname}"
     # created_date = fake.date()
     
     
 
     user = crud.create_user(email=email, password=password, fname = fname,lname=lname)
-    book = crud.create_book(author_id=user.user_id, title=title)
+    book = crud.create_book(author_id=author_id, title=title)
 
     # Create pages for book
     for m in range(1,10):

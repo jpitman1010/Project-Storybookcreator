@@ -1,41 +1,33 @@
-<!DOCTYPE html>
-<html>
+{% extends 'index.html' %} {% block head %}
 
-<head>
-    <link rel="stylesheet" href="/static/style.css">
+<title>
+    Login
+</title>
+<h1>Welcome to the Storybook Creator!!!</h1>
+{% endblock %}{% block content %}
 
-    <title>
-        Login
-    </title>
-    {% block body %}
-    <h1>Welcome to the Storybook Creator!!!</h1>
+<h1>Please log in.</h1>
 
+<form action="/login" method="POST" id="member-login">
+    <p>
+        Email <input type="text" name="email">
+    </p>
+    <p>
+        Password <input type="password" name="password">
 
+        <input type="submit" id="submit">
+    </p>
 
-    <h1>Please log in.</h1>
+</form>
 
-    <form action="/login" method="POST" id="member-login">
-        <p>
-            User ID <input type="text" name="user_id">
-        </p>
-        <p>
-            Password <input type="password" name="password">
-
-            <input type="submit">
-        </p>
-
-    </form>
-
-    <button id="password_help">
+<button id='password_help'>
         Password Help
     </button>
-    <script>
-    </script>
 
-    <div>
-        <h2>New to Storybook Creator? No problem!! Click <a href="user_registration.html">New User </a> to create an account.</h2>
+<div>
+    <h2>New to Storybook Creator? No problem!! Click <a href="/user_registration_route">New User </a> to create an account.</h2>
 
 
-    </div>
+</div>
 
-    {% endblock %}
+{% endblock %}
