@@ -74,7 +74,7 @@ def create_book(email):
     author_lname = db.session.query(User.lname).filter_by(id=author_id).all()
     title = "will be updated later"
     author = f'{author_fname} {author_lname}'
-    book = Book(title=title,author_id=author_id)
+    book = Book(title=title)
 
     db.session.add(book)
     db.session.commit()

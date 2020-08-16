@@ -15,6 +15,11 @@ app.jinja_env.undefined = StrictUndefined
 # require('dotevn').config();
 # const cloudinary = require('cloudinary').v2;
 
+
+cloud_name = os.environ.get('cloud_name')
+api_key = os.environ.get( 'cloudinary_api_key')
+api_secret = os.environ.get('cloudinary_api_secret')
+
 @app.route('/')
 def show_homepage():
     """View homepage"""
@@ -79,22 +84,23 @@ def go_to_make_pages():
 def create_text_and_images_for_pages():
     """creating text and images for each page"""
         
-    page_image = request.form.get("image-upload")
+    page_image = request.form.get("image-upload")   
     first_sentence = request.form.get("sentence1")
     second_sentence = request.form.get("sentence2")
     third_sentence = request.form.get("sentence3")
+    
+    page_text = f'{first_sentence}  {second_sentence}  {third_sentence}'
 
     session['first_sentence'] = first_sentence
     session['second_sentence'] = second_sentence
     session['third_sentence'] = third_sentence
     session['page_image'] = page_image
 
-    page_text = f'{first_sentence}  {second_sentence}  {third_sentence}'
     email = session['email']
     create_book_page = crud.create_book_page(page_text, page_image, email)
     
 
-    return render_template("created-page.html", first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image, page_text=page_text,create_book_page=create_book_page) 
+    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image, page_text=page_text) 
 
 
 
