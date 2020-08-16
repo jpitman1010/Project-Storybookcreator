@@ -46,22 +46,48 @@ def check_login(email, password):
         flash("Sorry, that is not a valid user login.")
         return redirect('/login')
 
-def create_book(author,title, book_id):
-    """Create a books"""
+def get_author_name(email):
+    """get author's name"""
 
-    book_id = db.sessoin.query(Book).filter_by(book_id=book_id).last()
-    book = Book(author= author,title=title)
+    author_fname = db.session.query(User.fname).filter_by(email=email).all()
+    author_lname= db.session.query(User.lname).filter_by(email=email).all()
+    author= f'{author_fname} {author_lname}'
+
+    return author
+
+
+def get_book_id():
+    """get author_id"""
+    
+    book_id = 0
+    book_id_list = db.session.query(Book.id).all()
+    for last_book in book_id_list:
+        book_id = last_book
+    return book_id
+
+
+def create_book(email):
+    """Create a book"""
+    
+    author_id = db.session.query(User.id).filter_by(email=email).first()
+    author_fname = db.session.query(User.fname).filter_by(id=author_id).all()
+    author_lname = db.session.query(User.lname).filter_by(id=author_id).all()
+    title = "will be updated later"
+    author = f'{author_fname} {author_lname}'
+    book = Book(title=title,author_id=author_id)
 
     db.session.add(book)
     db.session.commit()
 
-    return book
+    return author
 
-def create_book_page(page_number, page_text, page_image, book_id):
+def create_book_page(page_text, page_image, email):
     """Create a pages of book"""
-
-    number = db.session.query(Page).filter_by(book_id=book_id).last()
-    page = Page(number = page_number, text= page_text, image=page_image, book_id = book_id)
+    book_id = 0
+    book_id_list = db.session.query(Book.id).all()
+    for last_book in book_id_list:
+        book_id = last_book
+    page = Page(text= page_text, image=page_image, book_id = book_id)
 
     db.session.add(page)
     db.session.commit()
@@ -70,4 +96,4 @@ def create_book_page(page_number, page_text, page_image, book_id):
 
 if __name__ == '__main__':
     from storybookcreator import app
-    # connect_to_db(app)
+    connect_to_db(app)

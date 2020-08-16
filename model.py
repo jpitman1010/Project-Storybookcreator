@@ -60,7 +60,7 @@ class Book(db.Model):
     def __repr__(self):
         """show info about the book"""
 
-        return f"<User's book = {self.author_id}, Book ID={self.id} title={self.title}.>"
+        return f"<Author ID = {self.author_id}, Book ID={self.id} title={self.title}.>"
 
 class Page(db.Model):
     """A Book."""

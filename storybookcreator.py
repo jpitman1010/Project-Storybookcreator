@@ -1,7 +1,7 @@
 """Server for creating storybooks."""
 from flask import Flask, render_template, request, flash, session, redirect
 
-from model import connect_to_db, db
+from model import connect_to_db, db, Book,User,Page
 import crud
 import cloudinary
 import os
@@ -34,6 +34,7 @@ def user_reg_post_intake():
     fname = request.form.get('fname')
     lname = request.form.get('lname')
     session['fname'] = fname
+    session['email'] = email
     email_check = crud.get_user_by_email(email)
 
     if email_check:
@@ -48,7 +49,7 @@ def user_reg_post_intake():
 @app.route('/login', methods = ['POST'])
 def login():
     """Process login"""
-    email = request.form.get('email')
+    email = session['email']
     password= request.form.get('password')
     login = crud.check_login(email, password)
     
@@ -62,8 +63,9 @@ def login():
 @app.route('/library')
 def go_to_user_libary_page():
     """take user to their library"""
-    email = request.form.get('email')
+    email = session['email']
     fname = crud.get_users_fname(email)
+    create_book = crud.create_book(email)
     return render_template('library.html', fname=fname)
 
 
@@ -76,20 +78,24 @@ def go_to_make_pages():
 @app.route('/page-creation', methods=["POST"])
 def create_text_and_images_for_pages():
     """creating text and images for each page"""
-    first_sentence = request.form.get("first-sentence")
-    second_sentence = request.form.get("second-sentence")
-    third_sentence = request.form.get("third-sentence")
+        
+    page_image = request.form.get("image-upload")
+    first_sentence = request.form.get("sentence1")
+    second_sentence = request.form.get("sentence2")
+    third_sentence = request.form.get("sentence3")
+
     session['first_sentence'] = first_sentence
     session['second_sentence'] = second_sentence
     session['third_sentence'] = third_sentence
+    session['page_image'] = page_image
+
     page_text = f'{first_sentence}  {second_sentence}  {third_sentence}'
-    page_image = request.form.get("image-upload")
-    author = f'{fname} {lname}'
-    book_id = crud.create_book(author, book_id)
-    create_book_page = crud.create_book_page(page_number, page_text, page_image, book_id)
+    email = session['email']
+    create_book_page = crud.create_book_page(page_text, page_image, email)
+    
 
+    return render_template("created-page.html", first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image, page_text=page_text,create_book_page=create_book_page) 
 
-    return render_template("created-page.html", first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image)
 
 
 if __name__ == '__main__':
