@@ -1,24 +1,18 @@
 """Server for creating storybooks."""
 from flask import Flask, render_template, request, flash, session, redirect
-
 from model import connect_to_db, db, Book,User,Page
 import crud
-import cloudinary
 import os
+import sys
 from jinja2 import StrictUndefined
+import cloudinary
+import cloudinary.uploader
+
 
 app = Flask(__name__)
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
 
-
-# require('dotevn').config();
-# const cloudinary = require('cloudinary').v2;
-
-
-cloud_name = os.environ.get('cloud_name')
-api_key = os.environ.get( 'cloudinary_api_key')
-api_secret = os.environ.get('cloudinary_api_secret')
 
 @app.route('/')
 def show_homepage():
@@ -49,7 +43,7 @@ def user_reg_post_intake():
         create_user = crud.create_user(email, password, fname, lname)
         flash("Your account has successfully been registered. Please log in.")
 
-        return render_template('/login.html', create_user=create_user)
+        return render_template('/login.html', create_user=create_user,fname=fname,email=email)
 
 @app.route('/login', methods = ['POST'])
 def login():
@@ -57,10 +51,11 @@ def login():
     email = session['email']
     password= request.form.get('password')
     login = crud.check_login(email, password)
+    fname= crud.get_users_fname(email)
     
     if login:
         flash("You have successfully logged in.")
-        return crud.get_users_fname(email)
+        return render_template("library.html", fname=fname, email=email)
     else:
         flash("This password didnt match the user login.")
         return redirect('/login.html')
@@ -74,6 +69,7 @@ def go_to_user_libary_page():
     return render_template('library.html', fname=fname)
 
 
+
 @app.route('/pages')
 def go_to_make_pages():
     """take user to create book pages"""
@@ -83,24 +79,40 @@ def go_to_make_pages():
 @app.route('/page-creation', methods=["POST"])
 def create_text_and_images_for_pages():
     """creating text and images for each page"""
-        
-    page_image = request.form.get("image-upload")   
+    
+    # check if the post request has the file part
+    if 'image-upload' not in request.files:
+        raise Exception('No file part')
+        # return redirect(request.url)
+    page_image = request.files['image-upload']
+    # files = request.files.getlist('file')
+    # if files:
+    #     page_image = files[0].file.read()
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if page_image.filename == '':
+        raise Exception('No selected file')
+    app.logger.info(page_image)
+    cloudinary_id = cloudinary.uploader.upload(page_image)
+    app.logger.info("uploaded:"+str(cloudinary_id))
     first_sentence = request.form.get("sentence1")
     second_sentence = request.form.get("sentence2")
     third_sentence = request.form.get("sentence3")
     
-    page_text = f'{first_sentence}  {second_sentence}  {third_sentence}'
-
     session['first_sentence'] = first_sentence
     session['second_sentence'] = second_sentence
     session['third_sentence'] = third_sentence
     session['page_image'] = page_image
 
+    page_text = f"{first_sentence} {second_sentence} {third_sentence}"
+
     email = session['email']
     create_book_page = crud.create_book_page(page_text, page_image, email)
+
     
 
-    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image, page_text=page_text) 
+    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image) 
+
 
 
 
