@@ -57,7 +57,7 @@ def get_author_name(email):
 
 
 def get_book_id():
-    """get author_id"""
+    """get book_id"""
     
     book_id = 0
     book_id_list = db.session.query(Book.id).all()
@@ -81,6 +81,23 @@ def create_book(email):
 
     return author
 
+
+
+def get_page_id(book_id):
+    """get page_id"""
+
+    page_id = 0
+    page_id_list = db.session.query(Page.id).all()
+    for last_page in page_id_list:
+        page_id = last_page
+    return page_id
+
+def get_image_id(page_id):
+    """get image_id"""
+    image_id = db.session.query(Page.image).all()
+    
+    return page_id
+
 def create_book_page(page_text, page_image, email):
     """Create a pages of book"""
     book_id = 0
@@ -93,6 +110,18 @@ def create_book_page(page_text, page_image, email):
     db.session.commit()
 
     return page
+
+
+
+# def get_image_by_book_and_page_id(page_id):
+#     """get image from page based on page id and book id"""
+    
+#     page_image = db.session.query(Page.image).filter_by(page_id = page_id).all()
+
+
+#     return page_image
+
+
 
 if __name__ == '__main__':
     from storybookcreator import app

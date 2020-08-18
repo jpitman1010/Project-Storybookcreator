@@ -1,7 +1,7 @@
 """Tables for Storybook Creator App and connection to database"""
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, DateTime,String,LargeBinary
+from sqlalchemy import Column, Integer, DateTime,String, LargeBinary
 
 
 db = SQLAlchemy()
@@ -43,11 +43,11 @@ class Book(db.Model):
 
     id = db.Column(db.Integer, 
                         autoincrement=True,
-                        primary_key=True,)
+                        primary_key=True)
     title = db.Column(db.String,)
     # summary = db.Column(db.text,)
     # genre = db.Column(db.String,)
-    cover_img = db.Column (db.LargeBinary)
+    cover_img = db.Column (db.String)
     author_id = db.Column(db.Integer,
                         db.ForeignKey("users.id"),)
     created_date = db.Column(db.DateTime,default=datetime.datetime.utcnow,)
@@ -74,7 +74,7 @@ class Page(db.Model):
     book_id= db.Column(db.Integer,
                         db.ForeignKey('books.id'),)
     text = db.Column(db.String)
-    image = db.Column(db.LargeBinary)
+    image = db.Column(db.String)
 
 
     book = db.relationship('Book', backref='pages')

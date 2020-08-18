@@ -13,6 +13,16 @@ app = Flask(__name__)
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
 
+cloud_name = os.environ['CLOUDINARY_CLOUD_NAME']  
+cloud_api =os.environ['CLOUDINARY_API_KEY'] 
+cloud_api_secret = os.environ['CLOUDINARY_API_SECRET'] 
+
+cloudinary.config(
+  cloud_name = cloud_name,  
+  api_key = cloud_api,  
+  api_secret = cloud_api_secret
+)
+
 
 @app.route('/')
 def show_homepage():
@@ -76,6 +86,10 @@ def go_to_make_pages():
     
     return render_template('page.html')
 
+
+
+
+
 @app.route('/page-creation', methods=["POST"])
 def create_text_and_images_for_pages():
     """creating text and images for each page"""
@@ -84,17 +98,22 @@ def create_text_and_images_for_pages():
     if 'image-upload' not in request.files:
         raise Exception('No file part')
         # return redirect(request.url)
-    page_image = request.files['image-upload']
-    # files = request.files.getlist('file')
-    # if files:
-    #     page_image = files[0].file.read()
-    # if user does not select file, browser also
+    file = request.files['image-upload']
+    print(file, type(file), dir(file))
+    # if user does not select file, browser will also
     # submit an empty part without filename
-    if page_image.filename == '':
+    if file.filename == '':
         raise Exception('No selected file')
-    app.logger.info(page_image)
-    cloudinary_id = cloudinary.uploader.upload(page_image)
-    app.logger.info("uploaded:"+str(cloudinary_id))
+    
+    # page_image = file.read()
+    # app.logger.info(page_image)
+    response = cloudinary.uploader.upload(file)
+    print('cloudinary response', [response])
+    print("type", type(response)) 
+    print('dir', dir(response))
+    app.logger.info("uploaded:"+str(response))
+    # app.logger.info("url str:"+str())
+
     first_sentence = request.form.get("sentence1")
     second_sentence = request.form.get("sentence2")
     third_sentence = request.form.get("sentence3")
@@ -102,17 +121,31 @@ def create_text_and_images_for_pages():
     session['first_sentence'] = first_sentence
     session['second_sentence'] = second_sentence
     session['third_sentence'] = third_sentence
-    session['page_image'] = page_image
 
-    page_text = f"{first_sentence} {second_sentence} {third_sentence}"
+    page_image = response['url']
+    app.logger.info('page_image:'+page_image)
+    page_text = f"""
+    {first_sentence} 
+    {second_sentence} 
+    {third_sentence}"""
 
     email = session['email']
+    session['page_image']=page_image
+    book_id = crud.get_book_id()
+    page_id = crud.get_page_id(book_id)
+
     create_book_page = crud.create_book_page(page_text, page_image, email)
 
-    
 
-    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image) 
+    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image,create_book_page=create_book_page) 
 
+
+
+@app.route('/save_and_complete_book', methods=['POST'])
+def save_completed_book():
+    """ends book creation and shows complete created book in library"""
+
+    return render_template("library.html")
 
 
 
@@ -120,4 +153,4 @@ if __name__ == '__main__':
     
     connect_to_db(app)
   
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', debug=True, use_reloader=True)
