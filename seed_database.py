@@ -46,9 +46,14 @@ for n in range(1,10):
         page_number= m
         page_image =  f'{m}.png' # A unique image!
         page_text = fake.text()
+        cover_image = f'{m}.png'
 
-        page = crud.create_book_page(page_text=page_text, page_image=page_image, email=email)
+        page = crud.create_book_page(page_text=page_text, page_image=page_image)
+        cover_page = crud.create_cover_page(page_text=page_text, cover_image=cover_image)
+        page_in_book_db.append(cover_page)
         page_in_book_db.append(page)
+        
 
     book_in_db.append(book)
     user_in_db.append(user)
+    

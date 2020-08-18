@@ -45,13 +45,10 @@ class Book(db.Model):
                         autoincrement=True,
                         primary_key=True)
     title = db.Column(db.String,)
-    # summary = db.Column(db.text,)
-    # genre = db.Column(db.String,)
-    cover_img = db.Column (db.String)
+
     author_id = db.Column(db.Integer,
                         db.ForeignKey("users.id"),)
     created_date = db.Column(db.DateTime,default=datetime.datetime.utcnow,)
-    #change to datetime once seeding is working.
 
 
     author = db.relationship('User', backref = 'Book',)
@@ -70,29 +67,21 @@ class Page(db.Model):
     id= db.Column(db.Integer, 
                         autoincrement=True,
                         primary_key=True,)
-    # page_number =db.Column(db.Integer,)
     book_id= db.Column(db.Integer,
                         db.ForeignKey('books.id'),)
     text = db.Column(db.String)
     image = db.Column(db.String)
-
+    cover_image = db.Column (db.String)
 
     book = db.relationship('Book', backref='pages')
 
     def __repr__(self):
         """show info about the pages"""
 
-        return f"< Page Number ={self.id} page text={self.text}, page image = {self.image}.>"
+        return f"< Page Number ={self.id} page text={self.text}, page image = {self.image}, cover image = {self.cover_image}.>"
 
     
 
 if __name__ == '__main__':
     from storybookcreator import app
     connect_to_db(app)
-    # session = session_factory()
-    # app.db.create_all()
-    
-    # Call connect_to_db(app, echo=False)
-    #  if your program output gets
-    # too annoying; this will tell SQLAlchemy not to print out every
-    # query it executes.

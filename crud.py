@@ -18,10 +18,10 @@ def get_users():
 
     return db.session.query(User).all()
 
-def get_user_by_id():
+def get_user_by_id(email):
     """Return the user object by ID"""
     
-    return db.session.query(User).filter_by(user_id=user_id).one()
+    return db.session.query(User).filter_by(email=email).one()
 
 def get_users_fname(email):
     """get a list of user first name"""
@@ -56,8 +56,15 @@ def get_author_name(email):
     return author
 
 
+def get_book_title_list(email):
+    """get list of book titles for user"""
+    
+    book_title_list = db.session.query(Book.title).all()
+ 
+    return book_title_list
+
 def get_book_id():
-    """get book_id"""
+    """get book_ids by last book on list"""
     
     book_id = 0
     book_id_list = db.session.query(Book.id).all()
@@ -70,16 +77,21 @@ def create_book(email):
     """Create a book"""
     
     author_id = db.session.query(User.id).filter_by(email=email).first()
-    author_fname = db.session.query(User.fname).filter_by(id=author_id).all()
-    author_lname = db.session.query(User.lname).filter_by(id=author_id).all()
-    title = "will be updated later"
+    author_fname = db.session.query(User.fname).filter_by(email=email).all()
+    author_lname = db.session.query(User.lname).filter_by(email=email).all()
     author = f'{author_fname} {author_lname}'
-    book = Book(title=title)
+    book_id = get_book_id()
+    book_title_list = db.session.query(Book.title).all()
+    title = "New Title"
+    for last_title in book_title_list:
+        title = last_title
+
+    book = Book(author_id=author_id, title=title)
 
     db.session.add(book)
     db.session.commit()
 
-    return author
+    return [author, author_id, title]
 
 
 
@@ -98,20 +110,36 @@ def get_image_id(page_id):
     
     return page_id
 
-def create_book_page(page_text, page_image, email):
+def create_book_page(page_text, page_image):
     """Create a pages of book"""
+
+    book_id = get_book_id()
+
+    page = Page(text= page_text, image=page_image, book_id = book_id)
+    db.session.add(page)
+    db.session.commit()
+    return page
+
+def create_cover_page(page_text, cover_image):
+    """Create a cover of book"""
     book_id = 0
     book_id_list = db.session.query(Book.id).all()
     for last_book in book_id_list:
         book_id = last_book
-    page = Page(text= page_text, image=page_image, book_id = book_id)
+    cover_page = Page(text= page_text, cover_image=cover_image, book_id = book_id)
 
-    db.session.add(page)
+    db.session.add(cover_page)
     db.session.commit()
 
-    return page
+    return cover_page
 
+def get_completed_book(book_id, author_id):
+    """get completed book to show in libray"""
+    
+    book_id = get_book_id()
+    author_id = db.session.query(Book.author_id).filter_by(book_id).all()
 
+    return  "Completed book"
 
 # def get_image_by_book_and_page_id(page_id):
 #     """get image from page based on page id and book id"""

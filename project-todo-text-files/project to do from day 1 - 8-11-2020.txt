@@ -1,6 +1,0 @@
-To do:
-
-from login.html, created a help button, need to make event listener so if clicked it can take to a page for password recovery and send email to regiStringation account if password is forgotten.  
-**for now need to have alert pop up and say, this needs to be completed.
-
-

@@ -23,7 +23,6 @@ cloudinary.config(
   api_secret = cloud_api_secret
 )
 
-
 @app.route('/')
 def show_homepage():
     """View homepage"""
@@ -38,6 +37,7 @@ def route_to_registration_page():
 
 @app.route('/user_registration', methods = ['POST'])
 def user_reg_post_intake():
+    """take user registration info and make cookies"""
     email = request.form.get('email')
     password = request.form.get('password')
     fname = request.form.get('fname')
@@ -53,15 +53,18 @@ def user_reg_post_intake():
         create_user = crud.create_user(email, password, fname, lname)
         flash("Your account has successfully been registered. Please log in.")
 
-        return render_template('/login.html', create_user=create_user,fname=fname,email=email)
+        return render_template('/login.html', create_user=create_user,fname=fname,email=email, lname=lname)
 
 @app.route('/login', methods = ['POST'])
 def login():
     """Process login"""
-    email = session['email']
-    password= request.form.get('password')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    fname = request.form.get('fname')
+    lname = request.form.get('lname')
+    session['fname'] = fname
+    session['email'] = email
     login = crud.check_login(email, password)
-    fname= crud.get_users_fname(email)
     
     if login:
         flash("You have successfully logged in.")
@@ -75,9 +78,50 @@ def go_to_user_libary_page():
     """take user to their library"""
     email = session['email']
     fname = crud.get_users_fname(email)
-    create_book = crud.create_book(email)
-    return render_template('library.html', fname=fname)
+    author_id = crud.get_user_by_id(email)
+    book_title_list = crud.get_book_id(email)
+    session['book_title_list'] = book_id_list
+    title = crud.create_book()[-1]
+    completed_book = crud.get_completed_book(book_id,author_id, title)
+    session['fname']=fname
 
+    return render_template('library.html', fname=fname, email=email, book_title_list=book_title_list)
+
+
+@app.route('/cover_page_creation', methods=["POST"])
+def create_text_and_images_for_cover_page():
+    """creating text and images for cover page/storybook cover"""
+    
+    # check if the post request has the file part
+    if 'image-upload' not in request.files:
+        raise Exception('No file part')
+    file = request.files['image-upload']
+    print(file, type(file), dir(file))
+    # if user does not select file, browser will also
+    # submit an empty part without filename
+    if file.filename == '':
+        raise Exception('No selected file')
+    response = cloudinary.uploader.upload(file)
+
+    print('cloudinary response', [response])
+    print("type", type(response)) 
+    print('dir', dir(response))
+    app.logger.info("uploaded:"+str(response))
+
+    cover_image = response['url']
+   
+    session['cover_image'] = cover_image
+    
+    app.logger.info('cover_image:'+cover_image)
+    title = request.form.get('title')
+    page_text = f'{title}'
+    email = session['email']
+    book_id = crud.get_book_id()
+    page_id = crud.get_page_id(book_id)
+    create_book = crud.create_book(email)
+    create_cover_page = crud.create_cover_page(page_text, cover_image, email)
+
+    return render_template("cover_page_creation.html",title=title, cover_image=cover_image,create_cover_page=create_cover_page,create_book=create_book ) 
 
 
 @app.route('/pages')
@@ -85,9 +129,6 @@ def go_to_make_pages():
     """take user to create book pages"""
     
     return render_template('page.html')
-
-
-
 
 
 @app.route('/page-creation', methods=["POST"])
@@ -100,19 +141,16 @@ def create_text_and_images_for_pages():
         # return redirect(request.url)
     file = request.files['image-upload']
     print(file, type(file), dir(file))
-    # if user does not select file, browser will also
-    # submit an empty part without filename
+
     if file.filename == '':
         raise Exception('No selected file')
-    
-    # page_image = file.read()
-    # app.logger.info(page_image)
+
     response = cloudinary.uploader.upload(file)
+
     print('cloudinary response', [response])
     print("type", type(response)) 
     print('dir', dir(response))
     app.logger.info("uploaded:"+str(response))
-    # app.logger.info("url str:"+str())
 
     first_sentence = request.form.get("sentence1")
     second_sentence = request.form.get("sentence2")
@@ -123,6 +161,8 @@ def create_text_and_images_for_pages():
     session['third_sentence'] = third_sentence
 
     page_image = response['url']
+    
+
     app.logger.info('page_image:'+page_image)
     page_text = f"""
     {first_sentence} 

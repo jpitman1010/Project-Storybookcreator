@@ -4,12 +4,16 @@
     Welcome to your library {{session['fname']}} !!!
 </h1>
 
-<button><a href = "/pages" >Create New Storybook </a></button>
-
+<form id="create-new-storybook" action='/cover_page_creation'>
+    <input type="submit" value="Create New Storybook">
+</form>
+<br>
 <h3>Here is a list of the storybooks you have created in the past:</h3>
 <div>
+    for (book of {{'book_id_list'}}) {
     <ul>
-        <li></li>
+        <li>document.write(book);</li>
     </ul>
+    }
 </div>
 {% endblock %}
