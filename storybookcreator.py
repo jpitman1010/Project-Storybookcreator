@@ -42,53 +42,67 @@ def user_reg_post_intake():
     password = request.form.get('password')
     fname = request.form.get('fname')
     lname = request.form.get('lname')
-    session['fname'] = fname
-    session['email'] = email
+
+    print(email)
     email_check = crud.get_user_by_email(email)
 
     if email_check:
         flash("A user already exists with that email.  Please try again")
-        return redirect('/user_registration.html')
+        print("Already a user")
+        return redirect('/user_registration_route')
     else:
         create_user = crud.create_user(email, password, fname, lname)
         flash("Your account has successfully been registered. Please log in.")
-
         return render_template('/login.html', create_user=create_user,fname=fname,email=email, lname=lname)
 
-@app.route('/login', methods = ['POST'])
-def login():
-    """Process login"""
-    email = request.form.get('email')
+
+@app.route('/login_form', methods=['POST'])
+def login_form():
+    """Process login and check for user in database"""
+
     password = request.form.get('password')
-    fname = request.form.get('fname')
-    lname = request.form.get('lname')
+    email = request.form.get('email')
+
+    fname = crud.get_users_fname(email)
+
     session['fname'] = fname
     session['email'] = email
-    login = crud.check_login(email, password)
-    
-    if login:
-        flash("You have successfully logged in.")
-        return render_template("library.html", fname=fname, email=email)
+
+    email_check = crud.get_user_by_email(email)
+    password_check = crud.password_check(email, password)
+
+    if  email_check:
+        if  password_check:
+            flash("You have successfully logged in.")
+            print("You have successfully logged in.")
+            return render_template("/library.html", fname=fname, email=email)
+        else:
+            flash("This password didnt match the user login.")
+            print("This password didnt match the user login.")
+            return redirect('/')
     else:
-        flash("This password didnt match the user login.")
-        return redirect('/login.html')
+        flash("Sorry that is not a valid login email.  Please try again, or register as a new user.")
+        print("Sorry that is not a valid login email.  Please try again, or register as a new user.")
+        return redirect('/')
+
 
 @app.route('/library')
 def go_to_user_libary_page():
     """take user to their library"""
+
     email = session['email']
-    fname = crud.get_users_fname(email)
-    author_id = crud.get_user_by_id(email)
-    book_title_list = crud.get_book_id(email)
-    session['book_title_list'] = book_id_list
-    title = crud.create_book()[-1]
-    completed_book = crud.get_completed_book(book_id,author_id, title)
-    session['fname']=fname
+    fname = session['fname']
 
-    return render_template('library.html', fname=fname, email=email, book_title_list=book_title_list)
+    return render_template("/library.html", fname=fname, email=email)
 
 
-@app.route('/cover_page_creation', methods=["POST"])
+
+@app.route('/cover_page_creation')
+def cover_page_route():
+    """routes to page to creating text and images for cover page/storybook cover"""
+    return render_template("/cover_page_creation.html")
+
+@app.route('/cover_page_creation_form', methods=["POST"])
 def create_text_and_images_for_cover_page():
     """creating text and images for cover page/storybook cover"""
     
@@ -103,26 +117,26 @@ def create_text_and_images_for_cover_page():
         raise Exception('No selected file')
     response = cloudinary.uploader.upload(file)
 
-    print('cloudinary response', [response])
-    print("type", type(response)) 
-    print('dir', dir(response))
-    app.logger.info("uploaded:"+str(response))
-
     cover_image = response['url']
    
-    session['cover_image'] = cover_image
-    
-    app.logger.info('cover_image:'+cover_image)
     title = request.form.get('title')
-    page_text = f'{title}'
     email = session['email']
-    book_id = crud.get_book_id()
-    page_id = crud.get_page_id(book_id)
-    create_book = crud.create_book(email)
+    page_text = f'{title}'
+    create_book = crud.create_book(email, title)
     create_cover_page = crud.create_cover_page(page_text, cover_image, email)
 
-    return render_template("cover_page_creation.html",title=title, cover_image=cover_image,create_cover_page=create_cover_page,create_book=create_book ) 
+    session['cover_image'] = cover_image
+    session['title'] = title.title()
 
+    
+
+    return render_template("/page.html",title=title, cover_image=cover_image,create_cover_page=create_cover_page,create_book=create_book ) 
+
+# @app.route('/created_cover_page')
+# def add_cover_page_to_library():
+#     """adds created coverpage to library as a thumbnail link to book"""
+
+#     return render_template("/", cover_image=cover_image, title=title)
 
 @app.route('/pages')
 def go_to_make_pages():
@@ -140,17 +154,12 @@ def create_text_and_images_for_pages():
         raise Exception('No file part')
         # return redirect(request.url)
     file = request.files['image-upload']
-    print(file, type(file), dir(file))
+    # print(file, type(file), dir(file))
 
     if file.filename == '':
         raise Exception('No selected file')
 
     response = cloudinary.uploader.upload(file)
-
-    print('cloudinary response', [response])
-    print("type", type(response)) 
-    print('dir', dir(response))
-    app.logger.info("uploaded:"+str(response))
 
     first_sentence = request.form.get("sentence1")
     second_sentence = request.form.get("sentence2")
@@ -162,16 +171,16 @@ def create_text_and_images_for_pages():
 
     page_image = response['url']
     
-
-    app.logger.info('page_image:'+page_image)
     page_text = f"""
     {first_sentence} 
     {second_sentence} 
     {third_sentence}"""
 
     email = session['email']
-    session['page_image']=page_image
-    book_id = crud.get_book_id()
+    session['page_image'] = page_image
+    session['page_text'] = page_text
+
+    book_id = crud.get_book_id(email)
     page_id = crud.get_page_id(book_id)
 
     create_book_page = crud.create_book_page(page_text, page_image, email)
@@ -181,11 +190,18 @@ def create_text_and_images_for_pages():
 
 
 
-@app.route('/save_and_complete_book', methods=['POST'])
+@app.route('/save_and_complete_book')
 def save_completed_book():
     """ends book creation and shows complete created book in library"""
+    
+    email = session['email']
+    book_id = crud.get_book_id(email)
+    title = crud.get_book_title_list(email)[-1]
 
-    return render_template("library.html")
+    session['book_id'] = book_id
+    session['title'] = title
+
+    return render_template("updated-library.html")
 
 
 

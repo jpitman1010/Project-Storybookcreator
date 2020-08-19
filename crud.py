@@ -18,33 +18,27 @@ def get_users():
 
     return db.session.query(User).all()
 
-def get_user_by_id(email):
+def get_user_id(email):
     """Return the user object by ID"""
     
-    return db.session.query(User).filter_by(email=email).one()
+    return db.session.query(User.id).filter_by(email=email).one()
 
 def get_users_fname(email):
-    """get a list of user first name"""
-    # email = get_user_by_email(email)
-    fname = db.session.query(User.fname).filter_by(email=email).all()
+    """get user first name"""
+    fname = db.session.query(User.fname).filter_by(email=email).first()
     # print(fname)
-    return redirect('/library')
+    return fname
 
 def get_user_by_email(email):
-    """Return user email from regiStringation"""
+    """Return user email from registration"""
+    user_exists_check = db.session.query(User).filter_by(email=email).first()
+    return not not user_exists_check
 
-    return (db.session.query(User).filter_by(email=email).first())
 
-
-def check_login(email, password):
+def password_check(email, password):
     """verify that login information matches database of registered users"""
-    user = get_user_by_email(email)
-    
-    if user and password == user.password:
-        return render_template('library.html')
-    else:
-        flash("Sorry, that is not a valid user login.")
-        return redirect('/login')
+    valid_password = db.session.query(User).filter_by(password=password).first()
+    return not not valid_password
 
 def get_author_name(email):
     """get author's name"""
@@ -59,30 +53,28 @@ def get_author_name(email):
 def get_book_title_list(email):
     """get list of book titles for user"""
     
-    book_title_list = db.session.query(Book.title).all()
+    author_id = db.session.query(User.id).filter_by(email=email)
+    book_title_list = db.session.query(Book.title).filter_by(author_id=author_id).all()
  
     return book_title_list
 
-def get_book_id():
+def get_book_id(email):
     """get book_ids by last book on list"""
-    
+    user_id = get_user_id(email)
     book_id = 0
-    book_id_list = db.session.query(Book.id).all()
+    book_id_list = db.session.query(Book.id).filter_by(author_id = user_id).all()
     for last_book in book_id_list:
         book_id = last_book
     return book_id
 
 
-def create_book(email):
+def create_book(email, title):
     """Create a book"""
     
     author_id = db.session.query(User.id).filter_by(email=email).first()
-    author_fname = db.session.query(User.fname).filter_by(email=email).all()
-    author_lname = db.session.query(User.lname).filter_by(email=email).all()
-    author = f'{author_fname} {author_lname}'
-    book_id = get_book_id()
-    book_title_list = db.session.query(Book.title).all()
-    title = "New Title"
+    author = get_author_name(email)
+    book_id = get_book_id(email)
+    book_title_list = get_book_title_list(email)
     for last_title in book_title_list:
         title = last_title
 
@@ -108,19 +100,19 @@ def get_image_id(page_id):
     """get image_id"""
     image_id = db.session.query(Page.image).all()
     
-    return page_id
+    return image_id
 
-def create_book_page(page_text, page_image):
+def create_book_page(page_text, page_image, email):
     """Create a pages of book"""
 
-    book_id = get_book_id()
+    book_id = get_book_id(email)
 
     page = Page(text= page_text, image=page_image, book_id = book_id)
     db.session.add(page)
     db.session.commit()
     return page
 
-def create_cover_page(page_text, cover_image):
+def create_cover_page(page_text, cover_image, email):
     """Create a cover of book"""
     book_id = 0
     book_id_list = db.session.query(Book.id).all()
@@ -133,13 +125,19 @@ def create_cover_page(page_text, cover_image):
 
     return cover_page
 
-def get_completed_book(book_id, author_id):
-    """get completed book to show in libray"""
+def get_cover_image(email):
+    """retrieve a image of book cover to display in library"""
     
-    book_id = get_book_id()
-    author_id = db.session.query(Book.author_id).filter_by(book_id).all()
+    book_id = get_book_id(email)
+    page_id = get_page_id(book_id)
+    cover_image = db.session.query(Page.cover_image).filter_by(id=page_id).one()
 
-    return  "Completed book"
+    return cover_image
+
+def get_completed_book(book_id):
+    """get completed book to show in libray"""
+    completed_book = db.session.query(Book).filter_by(id = book_id).one()
+    return  not not completed_book
 
 # def get_image_by_book_and_page_id(page_id):
 #     """get image from page based on page id and book id"""

@@ -23,7 +23,7 @@ class User(db.Model):
     id = db.Column(db.Integer,
                         autoincrement=True,
                         primary_key= True,)
-    email = db.Column(db.String, unique = True,)
+    email = db.Column(db.String, unique = True)
     fname = db.Column(db.String)
     lname = db.Column(db.String)
     password = db.Column(db.String, nullable=False)
