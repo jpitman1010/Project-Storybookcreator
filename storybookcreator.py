@@ -67,6 +67,7 @@ def login_form():
 
     session['fname'] = fname
     session['email'] = email
+    print(fname)
 
     email_check = crud.get_user_by_email(email)
     password_check = crud.password_check(email, password)
@@ -75,7 +76,7 @@ def login_form():
         if  password_check:
             flash("You have successfully logged in.")
             print("You have successfully logged in.")
-            return render_template("/library.html", fname=fname, email=email)
+            return render_template("/library.html")
         else:
             flash("This password didnt match the user login.")
             print("This password didnt match the user login.")
@@ -93,8 +94,12 @@ def go_to_user_libary_page():
     email = session['email']
     fname = session['fname']
 
-    return render_template("/library.html", fname=fname, email=email)
+    completed_book_check = crud.check_database_for_completed_books(email)
 
+    if completed_book_check:
+        return render_template("/library.html", fname=fname, email=email)
+    else:
+        return render_template("/updated_library.html")
 
 
 @app.route('/cover_page_creation')
@@ -121,12 +126,14 @@ def create_text_and_images_for_cover_page():
    
     title = request.form.get('title')
     email = session['email']
+    author = crud.get_author_name(email)
     page_text = f'{title}'
     create_book = crud.create_book(email, title)
     create_cover_page = crud.create_cover_page(page_text, cover_image, email)
 
     session['cover_image'] = cover_image
     session['title'] = title.title()
+    session['author'] = author
 
     
 
@@ -142,7 +149,7 @@ def create_text_and_images_for_cover_page():
 def go_to_make_pages():
     """take user to create book pages"""
     
-    return render_template('page.html')
+    return render_template('create-page.html')
 
 
 @app.route('/page-creation', methods=["POST"])
@@ -196,12 +203,18 @@ def save_completed_book():
     
     email = session['email']
     book_id = crud.get_book_id(email)
-    title = crud.get_book_title_list(email)[-1]
+    title = crud.get_book_title(book_id)
 
     session['book_id'] = book_id
     session['title'] = title
 
-    return render_template("updated-library.html")
+    return render_template("/library.html", title=title,book_id=book_id)
+
+
+@app.route('/read_book/<book_id>')
+def read_book_by_book_id(book_id):
+
+
 
 
 

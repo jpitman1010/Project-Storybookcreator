@@ -26,7 +26,8 @@ def get_user_id(email):
 def get_users_fname(email):
     """get user first name"""
     fname = db.session.query(User.fname).filter_by(email=email).first()
-    # print(fname)
+    fname=fname[0]
+    print(fname[0])
     return fname
 
 def get_user_by_email(email):
@@ -43,9 +44,10 @@ def password_check(email, password):
 def get_author_name(email):
     """get author's name"""
 
-    author_fname = db.session.query(User.fname).filter_by(email=email).all()
-    author_lname= db.session.query(User.lname).filter_by(email=email).all()
-    author= f'{author_fname} {author_lname}'
+    fname = get_users_fname(email)
+    lname= db.session.query(User.lname).filter_by(email=email).first()
+    lname = lname[0]
+    author= f'{fname} {lname}'
 
     return author
 
@@ -138,6 +140,30 @@ def get_completed_book(book_id):
     """get completed book to show in libray"""
     completed_book = db.session.query(Book).filter_by(id = book_id).one()
     return  not not completed_book
+
+def get_book_title(book_id):
+    """get book title for library"""
+    title = db.session.query(Book.title).filter_by(id=book_id).first()
+    return title
+
+def check_database_for_completed_books(email):
+    """checking to see if any storybooks have been completed to return library with/without books route"""
+    completed_book_check = db.session.query(Book).filter_by(id = book_id).all()
+    return  not not completed_book_check
+
+def check_page_count_of_completed_book(book_id):
+    """get the number of pages in a users' book"""
+    page_list = db.session.query(Page.id).filter_by(book_id=book_id).all()
+    num_pages = len(page_list)
+    return num_pages
+
+def get_book_pages_by_book_id(book_id):
+    """get pages of book based on book_id"""
+    page_list = db.session.query(Page.id).filter_by(book_id=book_id).all()
+    return page_list
+
+
+
 
 # def get_image_by_book_and_page_id(page_id):
 #     """get image from page based on page id and book id"""
