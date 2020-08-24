@@ -38,7 +38,7 @@ for n in range(1,10):
     
 
     user = crud.create_user(email=email, password=password, fname = fname,lname=lname)
-    book = crud.create_book(email=email)
+    book = crud.create_book(email=email, title=title)
 
     # Create pages for book
     for m in range(1,10):
@@ -48,8 +48,8 @@ for n in range(1,10):
         page_text = fake.text()
         cover_image = f'{m}.png'
 
-        page = crud.create_book_page(page_text=page_text, page_image=page_image)
-        cover_page = crud.create_cover_page(page_text=page_text, cover_image=cover_image)
+        page = crud.create_book_page(page_text=page_text, page_image=page_image, email=email)
+        cover_page = crud.create_cover_page(page_text=page_text, cover_image=cover_image, email=email)
         page_in_book_db.append(cover_page)
         page_in_book_db.append(page)
         

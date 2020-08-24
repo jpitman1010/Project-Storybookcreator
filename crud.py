@@ -41,6 +41,13 @@ def password_check(email, password):
     valid_password = db.session.query(User).filter_by(password=password).first()
     return not not valid_password
 
+def get_author_id(email):
+    """get author id"""
+    user =  User.query.filter_by(email = email).first()
+    
+    return user
+
+
 def get_author_name(email):
     """get author's name"""
 
@@ -60,13 +67,11 @@ def get_book_title_list(email):
  
     return book_title_list
 
-def get_book_id(email):
+def get_book_id(title):
     """get book_ids by last book on list"""
-    user_id = get_user_id(email)
-    book_id = 0
-    book_id_list = db.session.query(Book.id).filter_by(author_id = user_id).all()
-    for last_book in book_id_list:
-        book_id = last_book
+    
+    book_id = db.session.query(Book.id).filter_by(title=title).first()
+
     return book_id
 
 
@@ -114,6 +119,12 @@ def create_book_page(page_text, page_image, email):
     db.session.commit()
     return page
 
+def get_book_object_list(author_id):
+    """get book list for updated library"""
+
+    books = Book.query.filter_by(author_id=author_id).all()
+    return books
+
 def create_cover_page(page_text, cover_image, email):
     """Create a cover of book"""
     book_id = 0
@@ -130,7 +141,7 @@ def create_cover_page(page_text, cover_image, email):
 def get_cover_image(email):
     """retrieve a image of book cover to display in library"""
     
-    book_id = get_book_id(email)
+    book_id = get_book_id(title)
     page_id = get_page_id(book_id)
     cover_image = db.session.query(Page.cover_image).filter_by(id=page_id).one()
 
@@ -138,13 +149,16 @@ def get_cover_image(email):
 
 def get_completed_book(book_id):
     """get completed book to show in libray"""
-    completed_book = db.session.query(Book).filter_by(id = book_id).one()
+    completed_book = db.session.query(Book).filter_by(id = book_id).all()
+    completed_book = completed_book[-1]
     return  not not completed_book
 
 def get_book_title(book_id):
     """get book title for library"""
-    title = db.session.query(Book.title).filter_by(id=book_id).first()
-    return title
+    # title = db.session.query(Book.title).filter_by(id=book_id).first()
+    book = Book.query.filter_by(id= book_id).all()
+    
+    return book
 
 def check_database_for_completed_books(email):
     """checking to see if any storybooks have been completed to return library with/without books route"""
@@ -152,7 +166,7 @@ def check_database_for_completed_books(email):
     return  not not completed_book_check
 
 def check_page_count_of_completed_book(book_id):
-    """get the number of pages in a users' book"""
+    """get the number of pages in a users' book to know when to stop using 'Next Page' """
     page_list = db.session.query(Page.id).filter_by(book_id=book_id).all()
     num_pages = len(page_list)
     return num_pages
@@ -162,7 +176,12 @@ def get_book_pages_by_book_id(book_id):
     page_list = db.session.query(Page.id).filter_by(book_id=book_id).all()
     return page_list
 
-
+def get_book_pages(book_id):
+    """get pages for book"""
+    # title = db.session.query(Book.title).filter_by(id=book_id).first()
+    page = Page.query.filter_by(book_id= book_id).all()
+    
+    return page
 
 
 # def get_image_by_book_and_page_id(page_id):

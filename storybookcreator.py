@@ -7,12 +7,11 @@ import sys
 from jinja2 import StrictUndefined
 import cloudinary
 import cloudinary.uploader
-
+from logging.config import dictConfig
 
 app = Flask(__name__)
 app.secret_key = "dev"
 app.jinja_env.undefined = StrictUndefined
-
 cloud_name = os.environ['CLOUDINARY_CLOUD_NAME']  
 cloud_api =os.environ['CLOUDINARY_API_KEY'] 
 cloud_api_secret = os.environ['CLOUDINARY_API_SECRET'] 
@@ -93,10 +92,10 @@ def go_to_user_libary_page():
 
     email = session['email']
     fname = session['fname']
-
+    
     completed_book_check = crud.check_database_for_completed_books(email)
 
-    if completed_book_check:
+    if not completed_book_check:
         return render_template("/library.html", fname=fname, email=email)
     else:
         return render_template("/updated_library.html")
@@ -135,15 +134,9 @@ def create_text_and_images_for_cover_page():
     session['title'] = title.title()
     session['author'] = author
 
-    
 
-    return render_template("/page.html",title=title, cover_image=cover_image,create_cover_page=create_cover_page,create_book=create_book ) 
+    return render_template("/create-page.html",title=title, cover_image=cover_image,create_cover_page=create_cover_page,create_book=create_book ) 
 
-# @app.route('/created_cover_page')
-# def add_cover_page_to_library():
-#     """adds created coverpage to library as a thumbnail link to book"""
-
-#     return render_template("/", cover_image=cover_image, title=title)
 
 @app.route('/pages')
 def go_to_make_pages():
@@ -175,9 +168,9 @@ def create_text_and_images_for_pages():
     session['first_sentence'] = first_sentence
     session['second_sentence'] = second_sentence
     session['third_sentence'] = third_sentence
-
     page_image = response['url']
-    
+    title = session['title']
+
     page_text = f"""
     {first_sentence} 
     {second_sentence} 
@@ -187,35 +180,45 @@ def create_text_and_images_for_pages():
     session['page_image'] = page_image
     session['page_text'] = page_text
 
-    book_id = crud.get_book_id(email)
+    book_id = crud.get_book_id(title)
     page_id = crud.get_page_id(book_id)
 
     create_book_page = crud.create_book_page(page_text, page_image, email)
 
-
-    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image,create_book_page=create_book_page) 
-
+    return render_template("created-page.html",first_sentence=first_sentence,second_sentence=second_sentence,third_sentence=third_sentence, page_image=page_image,create_book_page=create_book_page, book_id=book_id) 
 
 
 @app.route('/save_and_complete_book')
 def save_completed_book():
     """ends book creation and shows complete created book in library"""
-    
+
     email = session['email']
-    book_id = crud.get_book_id(email)
-    title = crud.get_book_title(book_id)
+    user = crud.get_author_id(email)
+    author_id = user.id
+    books = crud.get_book_object_list(author_id)
+    title = session['title']
+    book_id = crud.get_book_id(title)
+    page = crud.get_book_pages(book_id)
 
     session['book_id'] = book_id
-    session['title'] = title
+    app.logger.info(session)
 
-    return render_template("/library.html", title=title,book_id=book_id)
-
-
-@app.route('/read_book/<book_id>')
-def read_book_by_book_id(book_id):
+    return render_template("/updated-library.html", books=books, page=page, book_id=book_id)
 
 
+@app.route('/read_book/<book_id>/<page_id>')
+def read_book_by_book_id(book_id, page_id):
+    """get book page by book id and loop through all pages"""
 
+    email = session['email']
+    user = crud.get_author_id(email)
+    author_id = user.id
+    books = crud.get_book_object_list(author_id)
+    book_id = session['book_id']
+    page_count = crud.check_page_count_of_completed_book(book_id)
+    page = crud.get_book_pages(book_id)
+
+    return render_template("read-book.html", page=page, page_count=page_count, books=books)
 
 
 if __name__ == '__main__':
